@@ -1,7 +1,7 @@
 package com.pesocorporalehr.ehrrepository.service.impl;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.pesocorporalehr.ehrrepository.service.EhrIdService;
+import com.pesocorporalehr.ehrrepository.service.EhrIdSubjectService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
@@ -14,16 +14,16 @@ import java.util.List;
 import java.util.Map;
 
 @Service
-public class CreateEhrWithSubjectService implements EhrIdService {
+public class CreateEhrWithSubjectServiceImpl implements EhrIdSubjectService {
 
-    private final Logger logger = LoggerFactory.getLogger(CreateEhrWithSubjectService.class);
+    private final Logger logger = LoggerFactory.getLogger(CreateEhrWithSubjectServiceImpl.class);
 
     @Value("${ehrbase.url}")
     private String ehrBaseUrl;
 
     private final RestTemplate restTemplate;
 
-    public CreateEhrWithSubjectService(RestTemplate restTemplate) {
+    public CreateEhrWithSubjectServiceImpl(RestTemplate restTemplate) {
         this.restTemplate = restTemplate;
     }
 
@@ -85,14 +85,14 @@ public class CreateEhrWithSubjectService implements EhrIdService {
             String locationHeader = response.getHeaders().getFirst("Location");
             if (locationHeader != null) {
                 String ehrId = locationHeader.substring(locationHeader.lastIndexOf('/') + 1);
-                logger.info("✅ EHR creado exitosamente para '{}@{}': {}", subjectId, namespace, ehrId);
+                logger.info("EHR creado exitosamente para '{}@{}': {}", subjectId, namespace, ehrId);
                 return ehrId;
             }
 
             throw new RuntimeException("No se recibió Location header en la respuesta");
 
         } catch (Exception e) {
-            logger.error("❌ Error creando EHR para paciente '{}@{}'", subjectId, namespace, e);
+            logger.error("Error creando EHR para paciente '{}@{}'", subjectId, namespace, e);
             throw new RuntimeException("Fallo en la creación de EHR: " + e.getMessage());
         }
     }

@@ -64,9 +64,9 @@ public class TemplateUploaderService {
             logger.info("Resumen: {} plantillas subidas, {} ya existentes.", subidas, existentes);
 
         } catch (IOException e) {
-            logger.error("❌ Error leyendo las plantillas .opt desde classpath:/templates: {}", e.getMessage(), e);
+            logger.error("Error leyendo las plantillas .opt desde classpath:/templates: {}", e.getMessage(), e);
         } catch (Exception e) {
-            logger.error("❌ Error inesperado al subir plantillas: {}", e.getMessage(), e);
+            logger.error("Error inesperado al subir plantillas: {}", e.getMessage(), e);
         }
     }
 
@@ -85,20 +85,20 @@ public class TemplateUploaderService {
                     String.class);
 
             if (response.getStatusCode().is2xxSuccessful()) {
-                logger.info("✅ Plantilla '{}' subida con éxito.", templateId);
+                logger.info("Plantilla '{}' subida con éxito.", templateId);
             } else {
-                logger.warn("⚠️ Código inesperado al subir plantilla '{}': {}", templateId, response.getStatusCode());
+                logger.warn("Código inesperado al subir plantilla '{}': {}", templateId, response.getStatusCode());
             }
 
         } catch (HttpClientErrorException.Conflict e) {
-            logger.info("ℹ️ La plantilla '{}' ya existe (409 Conflict)", templateId);
+            logger.info("La plantilla '{}' ya existe (409 Conflict)", templateId);
         } catch (IOException e) {
-            logger.error("❌ No se pudo leer la plantilla '{}': {}", templateId, e.getMessage(), e);
+            logger.error("No se pudo leer la plantilla '{}': {}", templateId, e.getMessage(), e);
         }
     }
 
     private boolean templateExists(String templateId) {
-        logger.debug("🔍 Comprobando si existe plantilla '{}'", templateId);
+        logger.debug("Comprobando si existe plantilla '{}'", templateId);
         String checkUrl = ehrBaseUrl + "/definition/template/adl1.4/" + templateId;
 
         try {
@@ -111,13 +111,13 @@ public class TemplateUploaderService {
                     String.class);
 
             boolean exists = response.getStatusCode().is2xxSuccessful();
-            if (exists) logger.debug("✅ Plantilla '{}' encontrada en EHRbase.", templateId);
+            if (exists) logger.debug("Plantilla '{}' encontrada en EHRbase.", templateId);
             return exists;
 
         } catch (HttpClientErrorException.NotFound e) {
             return false;
         } catch (Exception e) {
-            logger.error("❌ Error al comprobar existencia de '{}': {}", templateId, e.getMessage(), e);
+            logger.error("Error al comprobar existencia de '{}': {}", templateId, e.getMessage(), e);
             return false;
         }
     }
