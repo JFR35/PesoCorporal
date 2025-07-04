@@ -65,4 +65,16 @@ public class GetAllEhrIdServiceImpl implements GetAllEhrIdService {
             return Collections.emptyList();
         }
     }
+
+    @Override
+    public String getEhrDetails(String ehrId) {
+        try {
+            String url = String.format("%s/ehr/%s", ehrBaseUrl, ehrId);
+            return restTemplate.getForObject(url, String.class);
+        } catch (Exception e) {
+            logger.warn("Error al obtener EHR con ID: {}", ehrId, e);
+            throw new RuntimeException("Error obteniendo EHR: " + e.getMessage());
+        }
+    }
+
 }

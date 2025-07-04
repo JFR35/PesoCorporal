@@ -5,4 +5,5 @@ import java.util.List;
 public interface GetAllEhrIdService {
 
     List<String> getAllEhrIds();
+    String getEhrDetails(String ehrId);
 }
