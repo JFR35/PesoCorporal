@@ -32,74 +32,68 @@ public class CreateEhrWithSubjectService implements EhrIdService {
         try {
             String url = ehrBaseUrl + "/ehr";
 
-            // 1. Configurar headers
+            // Configurar headers
             HttpHeaders headers = new HttpHeaders();
             headers.setContentType(MediaType.APPLICATION_JSON);
             headers.setAccept(List.of(MediaType.APPLICATION_JSON));
 
-            // 2. Crear estructura de datos ORDENADA
-            LinkedHashMap<String, Object> requestBody = new LinkedHashMap<>();
-            LinkedHashMap<String, Object> ehrStatus = new LinkedHashMap<>();
-
-            // IMPORTANTE: El orden de inserción es crucial
-            ehrStatus.put("_type", "EHR_STATUS");
-
-            LinkedHashMap<String, Object> name = new LinkedHashMap<>();
-            name.put("_type", "DV_TEXT");
-            name.put("value", "EHR Status");
-            ehrStatus.put("name", name);
-
-            LinkedHashMap<String, Object> subject = new LinkedHashMap<>();
-            subject.put("_type", "PARTY_IDENTIFIED");
-
-            LinkedHashMap<String, Object> externalRef = new LinkedHashMap<>();
-            externalRef.put("_type", "PARTY_REF");
-
+            // Construir subject con PARTY_SELF + external_ref
             LinkedHashMap<String, Object> id = new LinkedHashMap<>();
             id.put("_type", "GENERIC_ID");
             id.put("value", subjectId);
             id.put("scheme", "ehr_subjects");
-            externalRef.put("id", id);
 
+            LinkedHashMap<String, Object> externalRef = new LinkedHashMap<>();
+            externalRef.put("_type", "PARTY_REF");
+            externalRef.put("id", id);
             externalRef.put("namespace", namespace);
             externalRef.put("type", "PERSON");
-            subject.put("external_ref", externalRef);
-            ehrStatus.put("subject", subject);
 
+            LinkedHashMap<String, Object> subject = new LinkedHashMap<>();
+            subject.put("_type", "PARTY_SELF");
+            subject.put("external_ref", externalRef);
+
+            // EHR_STATUS
+            LinkedHashMap<String, Object> name = new LinkedHashMap<>();
+            name.put("_type", "DV_TEXT");
+            name.put("value", "EHR Status");
+
+            LinkedHashMap<String, Object> ehrStatus = new LinkedHashMap<>();
+            ehrStatus.put("_type", "EHR_STATUS");
+            ehrStatus.put("archetype_node_id", "openEHR-EHR-EHR_STATUS.generic.v1");
+            ehrStatus.put("name", name);
+            ehrStatus.put("subject", subject);
             ehrStatus.put("is_modifiable", true);
             ehrStatus.put("is_queryable", true);
 
+            // EHR_CREATE_REQUEST
+            LinkedHashMap<String, Object> requestBody = new LinkedHashMap<>();
+            requestBody.put("_type", "EHR_CREATE_REQUEST");
             requestBody.put("ehr_status", ehrStatus);
 
-            // 3. Crear request entity
-            HttpEntity<Map<String, Object>> request = new HttpEntity<>(requestBody, headers);
-
-            // 4. Loggear el request (para depuración)
+            // Log para depuración
             ObjectMapper mapper = new ObjectMapper();
             logger.debug("Request body: {}", mapper.writeValueAsString(requestBody));
 
-            // 5. Enviar la petición
+            //HttpEntity<Map<String, Object>> request = new HttpEntity<>(requestBody, headers);
+            HttpEntity<Map<String, Object>> request = new HttpEntity<>(ehrStatus, headers);
+
             ResponseEntity<Map> response = restTemplate.exchange(
-                    url,
-                    HttpMethod.POST,
-                    request,
-                    Map.class
+                    url, HttpMethod.POST, request, Map.class
             );
 
-            // 6. Procesar respuesta
             String locationHeader = response.getHeaders().getFirst("Location");
             if (locationHeader != null) {
                 String ehrId = locationHeader.substring(locationHeader.lastIndexOf('/') + 1);
-                logger.info("EHR creado exitosamente para '{}@{}': {}", subjectId, namespace, ehrId);
+                logger.info("✅ EHR creado exitosamente para '{}@{}': {}", subjectId, namespace, ehrId);
                 return ehrId;
             }
 
             throw new RuntimeException("No se recibió Location header en la respuesta");
 
         } catch (Exception e) {
-            logger.error("Error creando EHR para paciente '{}@{}'", subjectId, namespace, e);
+            logger.error("❌ Error creando EHR para paciente '{}@{}'", subjectId, namespace, e);
             throw new RuntimeException("Fallo en la creación de EHR: " + e.getMessage());
         }
     }
-
 }
