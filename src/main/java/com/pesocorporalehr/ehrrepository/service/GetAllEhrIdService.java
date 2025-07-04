@@ -6,4 +6,5 @@ public interface GetAllEhrIdService {
 
     List<String> getAllEhrIds();
     String getEhrDetails(String ehrId);
+    String getEhrBySubjectId(String subjectId);
 }

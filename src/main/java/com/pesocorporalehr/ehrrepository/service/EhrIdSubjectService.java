@@ -1,6 +1,6 @@
 package com.pesocorporalehr.ehrrepository.service;
 
-public interface EhrIdService {
+public interface EhrIdSubjectService {
 
     String createEhrWithSubjectService (String subjectId, String namespace);
 }
